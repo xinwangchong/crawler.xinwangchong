@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org/DTD Mapper 3.0" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinwangchong.crawler.dao.CrawlerVideoDao">
+	<insert id="insertCrawlerVideo" parameterType="List">
+		insert into crawler_video
+		(id,type,source,imgUrl,videoUrl,title,createTime) values
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			(#{item.id},#{item.type},#{item.source},#{item.imgUrl},#{item.videoUrl},#{item.title},now())
+		</foreach>
+	</insert>
+	<delete id="deletCrawlerVideo">
+		delete from crawler_video where
+		#{createTime}>crawler_video
+	</delete>
+</mapper>
