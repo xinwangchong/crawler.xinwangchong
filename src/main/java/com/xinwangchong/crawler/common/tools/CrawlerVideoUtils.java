@@ -1,4 +1,4 @@
-package com.xinwangchong.crawler.common;
+package com.xinwangchong.crawler.common.tools;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -8,16 +8,18 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 public class CrawlerVideoUtils {
-	public static Document jsoupConn(String url){
+	public static Document jsoupConn(String url,Map<String, String> cookie){
 		try {
-			Thread.sleep(1000);
+			Thread.sleep(2000);
 			Connection conn = Jsoup.connect(url);
+			if (cookie!=null) {
+				conn.cookies(cookie);
+			}
 			Document doc = conn.get();
 			return doc;
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
@@ -26,18 +28,16 @@ public class CrawlerVideoUtils {
 			Map<String, Object> map=null;
 			String shuoshuUrl="http://www.flvcd.com/parse.php?format=&kw=";
 			String url=shuoshuUrl+targetUrl;
-			Document doc=jsoupConn(url);
+			Document doc=jsoupConn(url,null);
 			if (doc==null) {
 				for (int i = 0; i < 60; i++) {
-					try {
-						Thread.sleep(1000);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					doc=jsoupConn(url);
+					doc=jsoupConn(url,null);
 					if (doc!=null) {
 						break;
 					}
+				}
+				if (doc==null) {
+					return null;
 				}
 			}
 			Elements select = doc.select("a[onclick=_alert();return false;]");
@@ -55,8 +55,6 @@ public class CrawlerVideoUtils {
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
-					//System.out.println(count);
-					//System.out.println("错误："+targetUrl);
 					map=new HashMap<String, Object>();
 					map.put("videoUrl", videoUrl);
 					map.put("count", count);
@@ -70,8 +68,6 @@ public class CrawlerVideoUtils {
 					e.printStackTrace();
 				}
 				count++;
-				//System.out.println(count);
-				//System.out.println("错误："+targetUrl);
 				map=new HashMap<String, Object>();
 				map.put("videoUrl", videoUrl);
 				map.put("count", count);

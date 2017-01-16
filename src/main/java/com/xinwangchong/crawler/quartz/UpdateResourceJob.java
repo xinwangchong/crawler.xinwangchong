@@ -7,9 +7,9 @@ import java.util.UUID;
 
 import javax.annotation.Resource;
 
-import com.xinwangchong.crawler.common.DateUtils;
-import com.xinwangchong.crawler.common.FileUtils;
-import com.xinwangchong.crawler.common.StringUtils;
+import com.xinwangchong.crawler.common.tools.DateUtils;
+import com.xinwangchong.crawler.common.tools.FileUtils;
+import com.xinwangchong.crawler.common.tools.StringUtils;
 import com.xinwangchong.crawler.entity.CrawlerVideo;
 import com.xinwangchong.crawler.service.ResourceService;
 

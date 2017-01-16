@@ -11,9 +11,9 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import com.alibaba.fastjson.JSON;
-import com.xinwangchong.crawler.common.BizTools;
-import com.xinwangchong.crawler.common.HttpClient;
-import com.xinwangchong.crawler.common.StringUtils;
+import com.xinwangchong.crawler.common.tools.BizTools;
+import com.xinwangchong.crawler.common.tools.HttpClient;
+import com.xinwangchong.crawler.common.tools.StringUtils;
 import com.xinwangchong.crawler.entity.CrawlerVideo;
 
 public class Meipai {
@@ -128,9 +128,10 @@ public class Meipai {
 				}else{
 					re = crawlerFirstPage(type);
 				}
-				List<CrawlerVideo> recvs = (List<CrawlerVideo>) re.get("data");
-				cvs.addAll(recvs);
-				
+				if (re!=null) {
+					List<CrawlerVideo> recvs = (List<CrawlerVideo>) re.get("data");
+					cvs.addAll(recvs);
+				}
 			}
 		}
 		for (String type : types_2) {
@@ -143,10 +144,11 @@ public class Meipai {
 				}else{
 					re=crawlerFirstPage(split[0]);
 				}
-				List<CrawlerVideo> recvs = (List<CrawlerVideo>) re.get("data");
-				maxid=(String) re.get("maxid");
-				cvs.addAll(recvs);
-				
+				if (re!=null) {
+					List<CrawlerVideo> recvs = (List<CrawlerVideo>) re.get("data");
+					maxid=(String) re.get("maxid");
+					cvs.addAll(recvs);
+				}
 			}
 		}
 		return cvs;

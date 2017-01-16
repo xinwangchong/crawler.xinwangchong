@@ -1,4 +1,4 @@
-package com.xinwangchong.crawler.common;
+package com.xinwangchong.crawler.common.tools;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;

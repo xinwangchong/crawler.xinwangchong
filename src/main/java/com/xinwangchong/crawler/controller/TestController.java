@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.xinwangchong.crawler.common.StringUtils;
+import com.xinwangchong.crawler.common.tools.StringUtils;
 import com.xinwangchong.crawler.dao.CrawlerVideoDao;
 import com.xinwangchong.crawler.entity.CrawlerVideo;
 import com.xinwangchong.crawler.service.ResourceService;

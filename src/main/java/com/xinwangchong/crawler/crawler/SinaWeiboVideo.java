@@ -14,10 +14,10 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import com.alibaba.fastjson.JSON;
-import com.xinwangchong.crawler.common.BizTools;
-import com.xinwangchong.crawler.common.CrawlerVideoUtils;
-import com.xinwangchong.crawler.common.HttpClient;
-import com.xinwangchong.crawler.common.StringUtils;
+import com.xinwangchong.crawler.common.tools.BizTools;
+import com.xinwangchong.crawler.common.tools.CrawlerVideoUtils;
+import com.xinwangchong.crawler.common.tools.HttpClient;
+import com.xinwangchong.crawler.common.tools.StringUtils;
 import com.xinwangchong.crawler.entity.CrawlerVideo;
 public class SinaWeiboVideo {
 	public static Elements crawlerFirstPage(String type) {
@@ -79,7 +79,7 @@ public class SinaWeiboVideo {
 	}
 	public static List<CrawlerVideo> crawler(){
 		String[] types={"vfun","movie","music","lifestyle","sports","world","moe","show"};
-		int pages=500;
+		int pages=1;
 		String end_id="";
 		List<CrawlerVideo> cvs=new ArrayList<CrawlerVideo>();
 		String basicUrl="http://weibo.com";
@@ -97,9 +97,11 @@ public class SinaWeiboVideo {
 					break;
 				}
 				Map<String, Object> re = parseHtml(els,basicUrl,type);
-				List<CrawlerVideo> recvs = (List<CrawlerVideo>) re.get("data");
-				end_id=(String) re.get("maxid");
-				cvs.addAll(recvs);
+				if (re!=null) {
+					List<CrawlerVideo> recvs = (List<CrawlerVideo>) re.get("data");
+					end_id=(String) re.get("maxid");
+					cvs.addAll(recvs);
+				}
 			}
 		}
 			

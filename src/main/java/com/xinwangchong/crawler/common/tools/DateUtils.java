@@ -1,4 +1,4 @@
-package com.xinwangchong.crawler.common;
+package com.xinwangchong.crawler.common.tools;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
