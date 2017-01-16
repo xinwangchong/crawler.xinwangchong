@@ -1,37 +1,18 @@
 package com.xinwangchong.crawler.common.tools;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.jsoup.Connection;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
-public class CrawlerVideoUtils {
-	public static Document jsoupConn(String url,Map<String, String> cookie){
-		try {
-			Thread.sleep(2000);
-			Connection conn = Jsoup.connect(url);
-			if (cookie!=null) {
-				conn.cookies(cookie);
-			}
-			Document doc = conn.get();
-			return doc;
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
+public class ShuoshuVideoUtils {
+	
 	public static Map<String, Object> getVideoByShuoshu(String targetUrl,int count){
 			Map<String, Object> map=null;
 			String shuoshuUrl="http://www.flvcd.com/parse.php?format=&kw=";
 			String url=shuoshuUrl+targetUrl;
-			Document doc=jsoupConn(url,null);
+			Document doc=JsoupUtils.jsoupConn(url,null);
 			if (doc==null) {
 				for (int i = 0; i < 60; i++) {
-					doc=jsoupConn(url,null);
+					doc=JsoupUtils.jsoupConn(url,null);
 					if (doc!=null) {
 						break;
 					}

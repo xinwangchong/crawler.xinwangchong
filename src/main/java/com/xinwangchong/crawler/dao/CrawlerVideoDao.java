@@ -11,6 +11,8 @@ import com.xinwangchong.crawler.entity.CrawlerVideo;
 public interface CrawlerVideoDao {
 	
 	public int insertCrawlerVideo(List<CrawlerVideo> cvs) throws Exception;
+	
+	public int insertCrawlerVideosingle(CrawlerVideo cv)throws Exception;
 
 	public int deletCrawlerVideo(@Param("dateTime")Date dateTime) throws Exception;
 }

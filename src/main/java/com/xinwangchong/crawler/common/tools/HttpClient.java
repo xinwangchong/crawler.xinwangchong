@@ -62,8 +62,10 @@ public class HttpClient {
 		CloseableHttpClient httpclient = HttpClients.createDefault();
 		try {
 			HttpGet httpget = new HttpGet(url);
-			Header header = new BasicHeader("cookie", cookies);
-			httpget.addHeader(header);
+			if (cookies!=null) {
+				Header header = new BasicHeader("cookie", cookies);
+				httpget.addHeader(header);
+			}
 			CloseableHttpResponse response = httpclient.execute(httpget);
 			try {
 				HttpEntity entity = response.getEntity();

@@ -3,7 +3,7 @@ package com.xinwangchong.crawler.common.tools;
 import java.util.HashMap;
 import java.util.Map;
 
-public class BizTools {
+public class ResourceUtils {
 	public static String getTypeName(String tid) {
 		Map<String, String> types = allType();
 		return types.get(tid);

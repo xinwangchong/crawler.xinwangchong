@@ -9,6 +9,11 @@
 			(#{item.id},#{item.type},#{item.source},#{item.imgUrl},#{item.videoUrl},#{item.title},now())
 		</foreach>
 	</insert>
+	<insert id="insertCrawlerVideosingle" parameterType="com.xinwangchong.crawler.entity.CrawlerVideo">
+		insert into crawler_video
+		(id,type,source,imgUrl,videoUrl,title,createTime) values
+        (#{id},#{type},#{source},#{imgUrl},#{videoUrl},#{title},now())
+	</insert>
 	<delete id="deletCrawlerVideo">
 		delete from crawler_video where
 		#{createTime}>crawler_video

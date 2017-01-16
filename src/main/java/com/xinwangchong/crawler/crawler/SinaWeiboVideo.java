@@ -1,42 +1,61 @@
 package com.xinwangchong.crawler.crawler;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-
 import com.alibaba.fastjson.JSON;
-import com.xinwangchong.crawler.common.tools.BizTools;
-import com.xinwangchong.crawler.common.tools.CrawlerVideoUtils;
+import com.xinwangchong.crawler.common.tools.ResourceUtils;
+import com.xinwangchong.crawler.common.tools.ShuoshuVideoUtils;
+import com.xinwangchong.crawler.common.tools.Constant;
 import com.xinwangchong.crawler.common.tools.HttpClient;
+import com.xinwangchong.crawler.common.tools.JsoupUtils;
 import com.xinwangchong.crawler.common.tools.StringUtils;
 import com.xinwangchong.crawler.entity.CrawlerVideo;
+import com.xinwangchong.crawler.service.ResourceService;
+import com.xinwangchong.crawler.service.impl.ResourceServiceImpl;
 public class SinaWeiboVideo {
 	public static Elements crawlerFirstPage(String type) {
-		try {
-			String url="http://weibo.com/tv/"+type;
-			Connection conn = Jsoup.connect(url);
-			Map<String, String> cookie=new HashMap<String, String>();
-			cookie.put("SUB", "_2AkMvJRKKf8NhqwJRmP0cxWnna4VzzAHEieKZeeNRJRMxHRl-yT83qkNZtRBm8IFPLivtXz8hgb5iRvrP-4M1DQ..");
-			conn.cookies(cookie);
-			Document doc = conn.get();
-			return  doc.select("div.weibo_tv_frame>ul>a");
-		} catch (IOException e) {
-			e.printStackTrace();
+		String url="http://weibo.com/tv/"+type;
+		Map<String, String> cookie=new HashMap<String, String>();
+		cookie.put("SUB",Constant.SINA_COOKIE_SUB);
+		Document doc = JsoupUtils.jsoupConn(url, cookie);
+		if (doc==null) {
+			for (int i = 0; i < 60; i++) {
+				doc=JsoupUtils.jsoupConn(url, cookie);
+				if (doc!=null) {
+					break;
+				}
+			}
+			if (doc==null) {
+				return null;
+			}
 		}
-		return null;
+		return  doc.select("div.weibo_tv_frame>ul>a");
 	}
 	public static Elements crawlerAjaxPage(int page,String end_id,String type){
-		String cookies = "SUB=_2AkMvJRKKf8NhqwJRmP0cxWnna4VzzAHEieKZeeNRJRMxHRl-yT83qkNZtRBm8IFPLivtXz8hgb5iRvrP-4M1DQ..";
-		String str = HttpClient.get("http://weibo.com/p/aj/v6/mblog/videolist?type="+type+"&page="+page+"&end_id="+end_id+"&__rnd="+new Date().getTime(),cookies);
+		String url="http://weibo.com/p/aj/v6/mblog/videolist?type="+type+"&page="+page+"&end_id="+end_id+"&__rnd="+new Date().getTime();
+		String str = HttpClient.get(url,"SUB="+Constant.SINA_COOKIE_SUB);
+		if (str==null) {
+			for (int i = 0; i < 60; i++) {
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+				}
+				str = HttpClient.get(url,Constant.SINA_COOKIE_SUB);
+				if (str!=null) {
+					break;
+				}
+			}
+			if (str==null) {
+				return null;
+			}
+		}
+		System.out.println(str);
 		Map<String, Object> re = (Map<String, Object>) JSON.parse(str);
 		Map<String, Object> data = (Map<String, Object>) JSON.parse(re.get("data").toString());
 		String elstr = data.get("data").toString();
@@ -46,7 +65,7 @@ public class SinaWeiboVideo {
 		}
 		return null;
 	}
-	public static Map<String, Object> parseHtml(Elements es,String basicUrl,String type){
+	public static Map<String, Object> parseHtml(Elements es,String basicUrl,String type,ResourceService resourceService){
 		Map<String, Object> result=new HashMap<String, Object>();
 		List<CrawlerVideo> cvs=new ArrayList<CrawlerVideo>();
 		CrawlerVideo cv=null;
@@ -55,10 +74,10 @@ public class SinaWeiboVideo {
 			cv=new CrawlerVideo();
 			cv.setId(StringUtils.getUUID());
 			String url = basicUrl+element.attr("href");
-			Map<String, Object> reMap = CrawlerVideoUtils.getVideoByShuoshu(url,0);
+			Map<String, Object> reMap = ShuoshuVideoUtils.getVideoByShuoshu(url,0);
 			cv.setVideoUrl(reMap.get("videoUrl").toString());
 			cv.setImgUrl(element.select("div.pic>img.piccut").attr("src"));
-			cv.setType(BizTools.getTypeName(type));
+			cv.setType(ResourceUtils.getTypeName(type));
 			String title = element.select("div.intra_a>div.txt_cut").text();
 			int http_index = title.lastIndexOf("http");
 			if (http_index>-1) {
@@ -68,24 +87,30 @@ public class SinaWeiboVideo {
 			}
 			cv.setTitle(title);
 			end_id=element.attr("mid");
-			cvs.add(cv);
+			try {
+				resourceService.addCrawlerVideosingle(cv);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			//System.out.println(reMap.get("videoUrl").toString());
+			//cvs.add(cv);
 		}
-		if (cvs.size()>0) {
+		if (end_id!=null&&!end_id.equals("")) {
 			result.put("maxid", end_id);
-			result.put("data", cvs);
+			//result.put("data", cvs);
 			return result;
 		}
 		return null;
 	}
-	public static List<CrawlerVideo> crawler(){
+	public static List<CrawlerVideo> crawler(ResourceService resourceService){
 		String[] types={"vfun","movie","music","lifestyle","sports","world","moe","show"};
-		int pages=1;
+		int pages=2;
 		String end_id="";
 		List<CrawlerVideo> cvs=new ArrayList<CrawlerVideo>();
 		String basicUrl="http://weibo.com";
 		for (String type : types) {
-			//System.out.println(type);
 			for (int i = 1; i <= pages; i++) {
+				System.out.println("第"+i+"页");
 				Elements els=null;
 				if (i>1) {
 					els=crawlerAjaxPage(i,end_id,type);
@@ -93,10 +118,9 @@ public class SinaWeiboVideo {
 					els=crawlerFirstPage(type);
 				}
 				if (els==null) {
-					//System.out.println(i);
 					break;
 				}
-				Map<String, Object> re = parseHtml(els,basicUrl,type);
+				Map<String, Object> re = parseHtml(els,basicUrl,type,resourceService);
 				if (re!=null) {
 					List<CrawlerVideo> recvs = (List<CrawlerVideo>) re.get("data");
 					end_id=(String) re.get("maxid");
@@ -109,7 +133,8 @@ public class SinaWeiboVideo {
 		
 	}
 	public static void main(String[] args) {
-		List<CrawlerVideo> re = crawler();
+		ResourceService resourceService=new ResourceServiceImpl();
+		List<CrawlerVideo> re = crawler(resourceService);
 		for (CrawlerVideo cv : re) {
 			System.out.println("img:"+cv.getImgUrl());
 			System.out.println("video:"+cv.getVideoUrl());

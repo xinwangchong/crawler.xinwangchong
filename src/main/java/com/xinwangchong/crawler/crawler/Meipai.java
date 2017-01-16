@@ -1,29 +1,38 @@
 package com.xinwangchong.crawler.crawler;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.jsoup.Connection;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import com.alibaba.fastjson.JSON;
-import com.xinwangchong.crawler.common.tools.BizTools;
+import com.xinwangchong.crawler.common.tools.ResourceUtils;
 import com.xinwangchong.crawler.common.tools.HttpClient;
+import com.xinwangchong.crawler.common.tools.JsoupUtils;
 import com.xinwangchong.crawler.common.tools.StringUtils;
 import com.xinwangchong.crawler.entity.CrawlerVideo;
+import com.xinwangchong.crawler.service.ResourceService;
+import com.xinwangchong.crawler.service.impl.ResourceServiceImpl;
 
 public class Meipai {
-	public static Map<String, Object> crawlerFirstPage(String type) {
-		try {
+	public static Map<String, Object> crawlerFirstPage(String type,ResourceService resourceService) {
 			Map<String, Object> result=new HashMap<String, Object>();
-			List<CrawlerVideo> cvs=new ArrayList<CrawlerVideo>();
+			//List<CrawlerVideo> cvs=new ArrayList<CrawlerVideo>();
 			String url="http://www.meipai.com/square/"+type;
-			Connection conn = Jsoup.connect(url);
-			Document doc = conn.get();
+			Document doc = JsoupUtils.jsoupConn(url, null);
+			if (doc==null) {
+				for (int i = 0; i < 60; i++) {
+					doc=JsoupUtils.jsoupConn(url, null);
+					if (doc!=null) {
+						break;
+					}
+				}
+				if (doc==null) {
+					return null;
+				}
+			}
 			Elements els = doc.select("ul#mediasList>li");
 			String id=null;
 			CrawlerVideo cv=null;
@@ -35,27 +44,45 @@ public class Meipai {
 				cv.setVideoUrl( video_container.attr("data-video"));
 				cv.setTitle(StringUtils.getChineseInString(e.select("div.content-l-video.pr.cp>a.content-l-p.pa").text()));
 				id=video_container.attr("data-id");
-				cv.setType(BizTools.getTypeName(type));
-				cvs.add(cv);
+				cv.setType(ResourceUtils.getTypeName(type));
+				System.out.println(video_container.attr("data-video"));
+				try {
+					resourceService.addCrawlerVideosingle(cv);
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
+				//cvs.add(cv);
 			}
-			if (cvs.size()>0) {
+			if (id!=null&&!id.equals("")) {
 				result.put("maxid", id);
-				result.put("data", cvs);
+				//result.put("data", cvs);
 				return result;
 			}
 			return null;
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return null;
 	}
 	
-	public static Map<String, Object> crawlerAjaxPage_1(int page,String type){
-		String str = HttpClient.get("http://www.meipai.com/squares/new_timeline?page="+page+"&count=24&tid="+type,null);
+	public static Map<String, Object> crawlerAjaxPage_1(int page,String type,ResourceService resourceService){
+		String url="http://www.meipai.com/squares/new_timeline?page="+page+"&count=24&tid="+type;
+		String str = HttpClient.get(url,null);
+		if (str==null) {
+			for (int i = 0; i < 60; i++) {
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+				}
+				str = HttpClient.get(url,null);
+				if (str!=null) {
+					break;
+				}
+			}
+			if (str==null) {
+				return null;
+			}
+		}
 		Map<String, Object> re = (Map<String, Object>) JSON.parse(str);
 		List<Map<String, Object>> data = (List<Map<String, Object>>) JSON.parse(re.get("medias").toString());
 		Map<String, Object> result=new HashMap<String, Object>();
-		List<CrawlerVideo> cvs=new ArrayList<CrawlerVideo>();
+		//List<CrawlerVideo> cvs=new ArrayList<CrawlerVideo>();
 		CrawlerVideo cv=null;
 		for (Map<String, Object> map : data) {
 			cv=new CrawlerVideo();
@@ -63,23 +90,44 @@ public class Meipai {
 			cv.setImgUrl(map.get("cover_pic").toString());
 			cv.setTitle(StringUtils.getChineseInString(map.get("caption").toString()));
 			cv.setVideoUrl(map.get("video").toString());
-			cv.setType(BizTools.getTypeName(type));
-			cvs.add(cv);
+			cv.setType(ResourceUtils.getTypeName(type));
+			System.out.println(map.get("video").toString());
+			try {
+				resourceService.addCrawlerVideosingle(cv);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			//cvs.add(cv);
 		}
-		if (cvs.size()>0) {
+		/*if (cvs.size()>0) {
 			result.put("maxid", "");
 			result.put("data", cvs);
 			return result;
-		}
+		}*/
 		return null;
 	}
-	public static Map<String, Object> crawlerAjaxPage_2(int page,String type,String maxid){
+	public static Map<String, Object> crawlerAjaxPage_2(int page,String type,String maxid,ResourceService resourceService){
 		String url="http://www.meipai.com/topics/hot_timeline?page="+page+"&count=24&tid="+type+"&maxid="+maxid;
 		String str = HttpClient.get(url,null);
+		if (str==null) {
+			for (int i = 0; i < 60; i++) {
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+				}
+				str = HttpClient.get(url,null);
+				if (str!=null) {
+					break;
+				}
+			}
+			if (str==null) {
+				return null;
+			}
+		}
 		Map<String, Object> re = (Map<String, Object>) JSON.parse(str);
 		List<Map<String, Object>> data = (List<Map<String, Object>>) JSON.parse(re.get("medias").toString());
 		Map<String, Object> result=new HashMap<String, Object>();
-		List<CrawlerVideo> cvs=new ArrayList<CrawlerVideo>();
+		//List<CrawlerVideo> cvs=new ArrayList<CrawlerVideo>();
 		CrawlerVideo cv=null;
 		String id=null;
 		for (Map<String, Object> map : data) {
@@ -88,18 +136,25 @@ public class Meipai {
 			cv.setImgUrl(map.get("cover_pic").toString());
 			cv.setTitle(StringUtils.getChineseInString(map.get("caption").toString()));
 			cv.setVideoUrl(map.get("video").toString());
-			cv.setType(BizTools.getTypeName(type));
+			cv.setType(ResourceUtils.getTypeName(type));
 			id=map.get("id").toString();
-			cvs.add(cv);
+			System.out.println(map.get("video").toString());
+			try {
+				resourceService.addCrawlerVideosingle(cv);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			//cvs.add(cv);
 		}
-		if (cvs.size()>0) {
+		if (id!=null&&!id.equals("")) {
 			result.put("maxid", id);
-			result.put("data", cvs);
+			//result.put("data", cvs);
 			return result;
 		}
 		return null;
 	}
-	public static List<CrawlerVideo> crawler(){
+	public static List<CrawlerVideo> crawler(ResourceService resourceService){
 		//http://www.meipai.com/topics/hot_timeline?page=4&count=24&tid=5870490265939297486&maxid=644457940
 		//13.搞笑16.明星19.女神63.舞蹈27.美妆31.男神18.宝宝
 		//59.美食(tid=5870490265939297486)
@@ -123,10 +178,10 @@ public class Meipai {
 			for (int i = 1; i <= pages; i++) {
 				Map<String, Object> re=null;
 				if (i>1) {
-					re = crawlerAjaxPage_1(i,type);
+					re = crawlerAjaxPage_1(i,type,resourceService);
 					
 				}else{
-					re = crawlerFirstPage(type);
+					re = crawlerFirstPage(type,resourceService);
 				}
 				if (re!=null) {
 					List<CrawlerVideo> recvs = (List<CrawlerVideo>) re.get("data");
@@ -140,9 +195,9 @@ public class Meipai {
 			for (int i = 1; i <= pages; i++) {
 				Map<String, Object> re=null;
 				if (i>1) {
-					 re = crawlerAjaxPage_2(i,split[1],maxid);
+					 re = crawlerAjaxPage_2(i,split[1],maxid,resourceService);
 				}else{
-					re=crawlerFirstPage(split[0]);
+					re=crawlerFirstPage(split[0],resourceService);
 				}
 				if (re!=null) {
 					List<CrawlerVideo> recvs = (List<CrawlerVideo>) re.get("data");
@@ -154,7 +209,8 @@ public class Meipai {
 		return cvs;
 	}
 	public static void main(String[] args) {
-		List<CrawlerVideo> re = crawler();
+		ResourceService resourceService=new ResourceServiceImpl();
+		List<CrawlerVideo> re = crawler(resourceService);
 		for (CrawlerVideo cv : re) {
 			System.out.println("img:"+cv.getImgUrl());
 			System.out.println("video:"+cv.getVideoUrl());
