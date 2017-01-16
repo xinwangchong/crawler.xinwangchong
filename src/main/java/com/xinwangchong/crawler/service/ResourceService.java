@@ -11,5 +11,5 @@ public interface ResourceService {
 	
 	public int addCrawlerVideosingle(CrawlerVideo cv)throws Exception;
 	
-	public int removeResource(Date dateTime) throws Exception;
+	public int removeResource(Date dateTime,String source) throws Exception;
 }

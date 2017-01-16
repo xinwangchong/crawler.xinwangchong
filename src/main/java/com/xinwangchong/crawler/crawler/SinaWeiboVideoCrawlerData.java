@@ -18,7 +18,7 @@ import com.xinwangchong.crawler.common.tools.StringUtils;
 import com.xinwangchong.crawler.entity.CrawlerVideo;
 import com.xinwangchong.crawler.service.ResourceService;
 import com.xinwangchong.crawler.service.impl.ResourceServiceImpl;
-public class SinaWeiboVideo {
+public class SinaWeiboVideoCrawlerData {
 	public static Elements crawlerFirstPage(String type) {
 		String url="http://weibo.com/tv/"+type;
 		Map<String, String> cookie=new HashMap<String, String>();
@@ -86,6 +86,7 @@ public class SinaWeiboVideo {
 				title=title.trim();
 			}
 			cv.setTitle(title);
+			cv.setSource(Constant.SINA_WEIBO_VIDEO);
 			end_id=element.attr("mid");
 			try {
 				resourceService.addCrawlerVideosingle(cv);
@@ -102,11 +103,10 @@ public class SinaWeiboVideo {
 		}
 		return null;
 	}
-	public static List<CrawlerVideo> crawler(ResourceService resourceService){
+	public static List<CrawlerVideo> crawler(ResourceService resourceService,int pages){
 		String[] types={"vfun","movie","music","lifestyle","sports","world","moe","show"};
-		int pages=2;
 		String end_id="";
-		List<CrawlerVideo> cvs=new ArrayList<CrawlerVideo>();
+		//List<CrawlerVideo> cvs=new ArrayList<CrawlerVideo>();
 		String basicUrl="http://weibo.com";
 		for (String type : types) {
 			for (int i = 1; i <= pages; i++) {
@@ -122,23 +122,13 @@ public class SinaWeiboVideo {
 				}
 				Map<String, Object> re = parseHtml(els,basicUrl,type,resourceService);
 				if (re!=null) {
-					List<CrawlerVideo> recvs = (List<CrawlerVideo>) re.get("data");
 					end_id=(String) re.get("maxid");
-					cvs.addAll(recvs);
 				}
 			}
 		}
 			
-		return cvs;
+		return null;
 		
 	}
-	public static void main(String[] args) {
-		ResourceService resourceService=new ResourceServiceImpl();
-		List<CrawlerVideo> re = crawler(resourceService);
-		for (CrawlerVideo cv : re) {
-			System.out.println("img:"+cv.getImgUrl());
-			System.out.println("video:"+cv.getVideoUrl());
-			System.out.println("title:"+cv.getTitle());
-		}
-	}
+	
 }

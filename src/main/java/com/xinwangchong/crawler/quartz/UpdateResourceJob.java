@@ -1,34 +1,45 @@
 package com.xinwangchong.crawler.quartz;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-import java.util.UUID;
 
 import javax.annotation.Resource;
 
-import com.xinwangchong.crawler.common.tools.DateUtils;
-import com.xinwangchong.crawler.common.tools.FileUtils;
-import com.xinwangchong.crawler.common.tools.StringUtils;
-import com.xinwangchong.crawler.crawler.Meipai;
-import com.xinwangchong.crawler.entity.CrawlerVideo;
+import com.xinwangchong.crawler.common.tools.Constant;
+import com.xinwangchong.crawler.crawler.CrawlerData;
+import com.xinwangchong.crawler.crawler.MeipaiCrawlerData;
 import com.xinwangchong.crawler.service.ResourceService;
 
 public class UpdateResourceJob {
 	@Resource
 	private ResourceService resourceService;
+	public static Date deleteTime=null;
 	public void worker() {
 		try {
-			Meipai.crawler(resourceService);
-			/*List<CrawlerVideo> cvs=new ArrayList<CrawlerVideo>();
-			CrawlerVideo cv=new CrawlerVideo();
-			cv.setId(StringUtils.getUUID());
-			cvs.add(cv);
-			resourceService.addResource(cvs);*/
-			/*String content=DateUtils.dateToString(new Date())+" 爬取"+cvs.size()+"条视频入库\r\n";
-			FileUtils.contentToTxt("G:/crawler.log", content);*/
+			crawlerMeipaiWork(resourceService,2);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		/*try {
+			crawlerSinaWeiboWork(resourceService);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}*/
 	}
+	public void crawlerMeipaiWork(ResourceService rs,int pages) throws Exception{
+		CrawlerData crawlerData=new MeipaiCrawlerData();
+		crawlerData.crawler(rs,pages);
+		System.out.println("插入完毕，开始删除");
+		if (deleteTime!=null) {
+			rs.removeResource(deleteTime, Constant.MEI_PAI);
+			System.out.println("删除完毕");
+		}
+		deleteTime=new Date();
+	}
+	/*public void crawlerSinaWeiboWork(ResourceService rs,int pages) throws Exception{
+		SinaWeiboVideo.crawler(rs,500);
+		if (deleteTime!=null) {
+			deleteTime=new Date();
+			rs.removeResource(deleteTime, Constant.SINA_WEIBO_VIDEO);
+		}
+	}*/
 }

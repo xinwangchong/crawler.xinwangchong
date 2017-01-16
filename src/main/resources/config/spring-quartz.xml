@@ -13,7 +13,6 @@
         http://www.springframework.org/schema/aop/spring-aop.xsd">
 	<bean id="updateResourceJob" class="com.xinwangchong.crawler.quartz.UpdateResourceJob"></bean>
 
-	<!-- 定时器任务设置 -->
 	<bean id="updateResourceDetail"
 		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
 		<property name="targetObject" ref="updateResourceJob"></property>
@@ -21,9 +20,9 @@
 	</bean>
 	<bean id="cronTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
 		<property name="jobDetail" ref="updateResourceDetail"></property>
-		<property name="cronExpression" value="0/20 * * * * ?"></property>
+		<property name="cronExpression" value="0 0/3 * * * ?"></property>
 	</bean>
-
+	<!-- 0/20 * * * * ? -->
 	<bean id="startQuertz" lazy-init="false" autowire="no"
 		class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
 		<property name="triggers">

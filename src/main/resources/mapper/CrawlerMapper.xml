@@ -14,8 +14,14 @@
 		(id,type,source,imgUrl,videoUrl,title,createTime) values
         (#{id},#{type},#{source},#{imgUrl},#{videoUrl},#{title},now())
 	</insert>
-	<delete id="deletCrawlerVideo">
-		delete from crawler_video where
-		#{createTime}>crawler_video
+	<delete id="deletCrawlerVideo" >
+		delete from crawler_video where 1=1
+		<if test="createTime !=null">
+		and #{createTime}>createTime
+		</if>
+		<if test="source !=null and source !=''">
+		and source = #{source}
+		</if>
+		
 	</delete>
 </mapper>

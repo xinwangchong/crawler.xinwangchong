@@ -17,8 +17,8 @@ public class ResourceServiceImpl implements ResourceService {
 		return crawlerVideoDao.insertCrawlerVideo(cv);
 	}
 
-	public int removeResource(Date dateTime) throws Exception {
-		return crawlerVideoDao.deletCrawlerVideo(dateTime);
+	public int removeResource(Date dateTime,String source) throws Exception {
+		return crawlerVideoDao.deletCrawlerVideo(dateTime,source);
 	}
 
 	public int addCrawlerVideosingle(CrawlerVideo cv) throws Exception {

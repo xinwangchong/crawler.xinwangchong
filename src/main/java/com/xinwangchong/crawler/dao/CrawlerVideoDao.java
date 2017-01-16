@@ -14,5 +14,6 @@ public interface CrawlerVideoDao {
 	
 	public int insertCrawlerVideosingle(CrawlerVideo cv)throws Exception;
 
-	public int deletCrawlerVideo(@Param("dateTime")Date dateTime) throws Exception;
+	public int deletCrawlerVideo(@Param("createTime")Date dateTime,@Param("source")String source) throws Exception;
 }
+  
