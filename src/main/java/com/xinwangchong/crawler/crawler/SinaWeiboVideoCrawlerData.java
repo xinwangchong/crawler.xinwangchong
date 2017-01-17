@@ -88,9 +88,10 @@ public class SinaWeiboVideoCrawlerData implements CrawlerData {
 			String url = basicUrl+element.attr("href");
 			Map<String, Object> reMap = ShuoshuVideoUtils.getVideoByShuoshu(url,0);
 			String vu = reMap.get("videoUrl").toString();
-			/*if (vu!=null&&!vu.equals("")&&vu.substring(0,20).equals("http://us.sinaimg.cn")) {
-				continue;
-			}*/
+			if (vu!=null&&!vu.equals("")&&vu.substring(0,20).equals("http://us.sinaimg.cn")) {
+				System.out.println(url);
+				/*continue;*/
+			}
 			cv.setVideoUrl(reMap.get("videoUrl").toString());
 			cv.setImgUrl(element.select("div.pic>img.piccut").attr("src"));
 			cv.setType(ResourceUtils.getTypeName(type));
@@ -101,7 +102,7 @@ public class SinaWeiboVideoCrawlerData implements CrawlerData {
 			}else{
 				title=title.trim();
 			}
-			cv.setTitle(title);
+			cv.setTitle(StringUtils.getChineseInString(title));
 			cv.setSource(Constant.SINA_WEIBO_VIDEO);
 			end_id=element.attr("mid");
 			try {
