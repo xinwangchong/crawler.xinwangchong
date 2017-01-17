@@ -4,6 +4,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -12,13 +14,14 @@ import com.alibaba.fastjson.JSON;
 import com.xinwangchong.crawler.common.tools.ResourceUtils;
 import com.xinwangchong.crawler.common.tools.ShuoshuVideoUtils;
 import com.xinwangchong.crawler.common.tools.Constant;
+import com.xinwangchong.crawler.common.tools.DateUtils;
 import com.xinwangchong.crawler.common.tools.HttpClient;
 import com.xinwangchong.crawler.common.tools.JsoupUtils;
 import com.xinwangchong.crawler.common.tools.StringUtils;
 import com.xinwangchong.crawler.entity.CrawlerVideo;
 import com.xinwangchong.crawler.service.ResourceService;
-import com.xinwangchong.crawler.service.impl.ResourceServiceImpl;
-public class SinaWeiboVideoCrawlerData {
+public class SinaWeiboVideoCrawlerData implements CrawlerData {
+	public static Logger log = Logger.getLogger(SinaWeiboVideoCrawlerData.class);
 	public static Elements crawlerFirstPage(String type) {
 		String url="http://weibo.com/tv/"+type;
 		Map<String, String> cookie=new HashMap<String, String>();
@@ -45,6 +48,7 @@ public class SinaWeiboVideoCrawlerData {
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
+					log.info(DateUtils.dateToString(new Date())+"  HttpClient -> get 爬取美拍异步分页数据失败 页码："+page+" 视频资源类型 ："+type+" 异常信息："+e.getMessage());
 				}
 				str = HttpClient.get(url,Constant.SINA_COOKIE_SUB);
 				if (str!=null) {
@@ -55,8 +59,16 @@ public class SinaWeiboVideoCrawlerData {
 				return null;
 			}
 		}
-		System.out.println(str);
-		Map<String, Object> re = (Map<String, Object>) JSON.parse(str);
+		Map<String, Object> re = null;
+		try {
+			re = (Map<String, Object>) JSON.parse(str);
+		} catch (Exception e) {
+			log.info(DateUtils.dateToString(new Date())+"  HttpClient -> get 爬取美拍异步分页数据失败 页码："+page+" 视频资源类型 ："+type+" 异常信息：返回了html原因是Sina Visitor System 权限校验失败");
+			re=null;
+		}
+		if (re==null) {
+			return null;
+		}
 		Map<String, Object> data = (Map<String, Object>) JSON.parse(re.get("data").toString());
 		String elstr = data.get("data").toString();
 		if (elstr!=null&&!"".equals(elstr)) {
@@ -75,6 +87,10 @@ public class SinaWeiboVideoCrawlerData {
 			cv.setId(StringUtils.getUUID());
 			String url = basicUrl+element.attr("href");
 			Map<String, Object> reMap = ShuoshuVideoUtils.getVideoByShuoshu(url,0);
+			String vu = reMap.get("videoUrl").toString();
+			/*if (vu!=null&&!vu.equals("")&&vu.substring(0,20).equals("http://us.sinaimg.cn")) {
+				continue;
+			}*/
 			cv.setVideoUrl(reMap.get("videoUrl").toString());
 			cv.setImgUrl(element.select("div.pic>img.piccut").attr("src"));
 			cv.setType(ResourceUtils.getTypeName(type));
@@ -93,24 +109,19 @@ public class SinaWeiboVideoCrawlerData {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			//System.out.println(reMap.get("videoUrl").toString());
-			//cvs.add(cv);
 		}
 		if (end_id!=null&&!end_id.equals("")) {
 			result.put("maxid", end_id);
-			//result.put("data", cvs);
 			return result;
 		}
 		return null;
 	}
-	public static List<CrawlerVideo> crawler(ResourceService resourceService,int pages){
+	public Map<String, Object> crawler(ResourceService resourceService, int pages) {
 		String[] types={"vfun","movie","music","lifestyle","sports","world","moe","show"};
 		String end_id="";
-		//List<CrawlerVideo> cvs=new ArrayList<CrawlerVideo>();
 		String basicUrl="http://weibo.com";
 		for (String type : types) {
 			for (int i = 1; i <= pages; i++) {
-				System.out.println("第"+i+"页");
 				Elements els=null;
 				if (i>1) {
 					els=crawlerAjaxPage(i,end_id,type);
@@ -128,7 +139,5 @@ public class SinaWeiboVideoCrawlerData {
 		}
 			
 		return null;
-		
 	}
-	
 }

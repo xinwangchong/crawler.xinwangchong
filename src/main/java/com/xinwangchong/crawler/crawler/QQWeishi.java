@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.log4j.Logger;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -17,11 +18,18 @@ import com.xinwangchong.crawler.common.tools.JsoupUtils;
 import com.xinwangchong.crawler.common.tools.StringUtils;
 import com.xinwangchong.crawler.entity.CrawlerVideo;
 import com.xinwangchong.crawler.service.ResourceService;
-public class MeipaiCrawlerData implements CrawlerData {
-	public static Logger log = Logger.getLogger(MeipaiCrawlerData.class);
+
+public class QQWeishi implements CrawlerData {
+	public static Logger log = Logger.getLogger(QQWeishi.class);
+	public static void main(String[] args) {
+		String url="http://wsm.qq.com/weishi/tag/channelTimeline.php?v=p&g_tk=1184065862&r=1484635017429&callback=jQuery110205478808217984563_1484635017155&start=0&pageflag=2&reqnum=12&lastid=&type=1&key=1&_=1484635017156";
+		String cookie="pt2gguin=o1083447590; ptcz=cf88c8b9c1c2ef2341d49391145168d0a974217d374a7c30afa119e2e265c36b; uin=o1083447590; skey=@RHm7EI7SK; pgv_pvi=7413371904; pgv_si=s2159676416; ptisp=ctc; RK=ovmOheiqcp; rv2=8055D3DE30FB892AB074F4E943F1C24866DE9658BDB8B14780; property20=AE56C1F5A5F85CB2D086EB37C703C60890F2E6114809556EC903CA38127B35585CFD1B3C6F9E48CE; pgv_pvid=7055602006; pgv_info=ssid=s1246900245; o_cookie=1083447590";
+		String string = "{\"ret\":-4,\"errcode\":-4,\"msg\":\"\u8df3\u8f6c\u53c2\u6570\u9519\u8bef\"}";
+		System.out.println(JSON.parse(string));
+	}
 	public static Map<String, Object> crawlerFirstPage(String type, ResourceService resourceService) {
 		Map<String, Object> result = new HashMap<String, Object>();
-		String url = "http://www.meipai.com/square/" + type;
+		String url = "http://weishi.qq.com/c/"+type+"?fall=1";
 		Document doc = JsoupUtils.jsoupConn(url, null);
 		if (doc == null) {
 			for (int i = 0; i < 60; i++) {
@@ -34,7 +42,7 @@ public class MeipaiCrawlerData implements CrawlerData {
 				return null;
 			}
 		}
-		Elements els = doc.select("ul#mediasList>li");
+		Elements els = doc.select("article");
 		String id = null;
 		CrawlerVideo cv = null;
 		for (Element e : els) {
@@ -48,11 +56,11 @@ public class MeipaiCrawlerData implements CrawlerData {
 			id = video_container.attr("data-id");
 			cv.setType(ResourceUtils.getTypeName(type));
 			cv.setSource(Constant.MEI_PAI);
-			try {
+			/*try {
 				resourceService.addCrawlerVideosingle(cv);
 			} catch (Exception e1) {
 				log.info(DateUtils.dateToString(new Date())+"  "+vu+" 视频资源入库失败"+" 异常信息："+e1.getMessage());
-			}
+			}*/
 		}
 		if (id != null && !id.equals("")) {
 			result.put("maxid", id);

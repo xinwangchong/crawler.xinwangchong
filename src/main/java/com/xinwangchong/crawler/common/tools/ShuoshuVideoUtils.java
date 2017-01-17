@@ -1,10 +1,14 @@
 package com.xinwangchong.crawler.common.tools;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.apache.log4j.Logger;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
+import org.slf4j.LoggerFactory;
 public class ShuoshuVideoUtils {
-	
+	public static Logger log = Logger.getLogger(ShuoshuVideoUtils.class);
 	public static Map<String, Object> getVideoByShuoshu(String targetUrl,int count){
 			Map<String, Object> map=null;
 			String shuoshuUrl="http://www.flvcd.com/parse.php?format=&kw=";
@@ -46,7 +50,8 @@ public class ShuoshuVideoUtils {
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
-					e.printStackTrace();
+					log.info(DateUtils.dateToString(new Date())+" Jsou 爬去硕鼠出现异常 "+e.getMessage());
+					//e.printStackTrace();
 				}
 				count++;
 				map=new HashMap<String, Object>();

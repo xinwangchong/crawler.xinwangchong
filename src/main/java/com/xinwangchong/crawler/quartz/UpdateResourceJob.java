@@ -4,42 +4,44 @@ import java.util.Date;
 
 import javax.annotation.Resource;
 
+import org.apache.log4j.Logger;
+
 import com.xinwangchong.crawler.common.tools.Constant;
+import com.xinwangchong.crawler.common.tools.DateUtils;
 import com.xinwangchong.crawler.crawler.CrawlerData;
 import com.xinwangchong.crawler.crawler.MeipaiCrawlerData;
+import com.xinwangchong.crawler.crawler.SinaWeiboVideoCrawlerData;
 import com.xinwangchong.crawler.service.ResourceService;
 
 public class UpdateResourceJob {
+	public static Logger log = Logger.getLogger(UpdateResourceJob.class);
 	@Resource
 	private ResourceService resourceService;
 	public static Date deleteTime=null;
 	public void worker() {
 		try {
-			crawlerMeipaiWork(resourceService,2);
+			crawlerMeipaiWork(resourceService,1,new MeipaiCrawlerData());
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.info(DateUtils.dateToString(new Date())+" 抓取美拍视频此次调度失败");
 		}
-		/*try {
-			crawlerSinaWeiboWork(resourceService);
+		try {
+			crawlerSinaWeiboWork(resourceService,1,new SinaWeiboVideoCrawlerData());
 		} catch (Exception e) {
-			e.printStackTrace();
-		}*/
+			log.info(DateUtils.dateToString(new Date())+" 抓取新浪微博视频此次调度失败");
+		}
 	}
-	public void crawlerMeipaiWork(ResourceService rs,int pages) throws Exception{
-		CrawlerData crawlerData=new MeipaiCrawlerData();
+	private void crawlerMeipaiWork(ResourceService rs,int pages,CrawlerData crawlerData) throws Exception{
 		crawlerData.crawler(rs,pages);
-		System.out.println("插入完毕，开始删除");
 		if (deleteTime!=null) {
 			rs.removeResource(deleteTime, Constant.MEI_PAI);
-			System.out.println("删除完毕");
 		}
 		deleteTime=new Date();
 	}
-	/*public void crawlerSinaWeiboWork(ResourceService rs,int pages) throws Exception{
-		SinaWeiboVideo.crawler(rs,500);
+	private void crawlerSinaWeiboWork(ResourceService rs,int pages,CrawlerData crawlerData) throws Exception{
+		crawlerData.crawler(rs,pages);
 		if (deleteTime!=null) {
-			deleteTime=new Date();
 			rs.removeResource(deleteTime, Constant.SINA_WEIBO_VIDEO);
 		}
-	}*/
+		deleteTime=new Date();
+	}
 }
