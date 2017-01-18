@@ -8,7 +8,7 @@ public class ResourceUtils {
 		Map<String, String> types = allType();
 		return types.get(tid);
 	}
-
+	//父类型：娱乐，新闻,体育,剧集，军事
 	public static Map<String, String> allType() {
 		Map<String, String> map = new HashMap<String, String>();
 		map.put("13", "搞笑");

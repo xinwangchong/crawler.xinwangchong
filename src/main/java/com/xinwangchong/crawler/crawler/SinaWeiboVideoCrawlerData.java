@@ -26,38 +26,19 @@ public class SinaWeiboVideoCrawlerData implements CrawlerData {
 		String url="http://weibo.com/tv/"+type;
 		Map<String, String> cookie=new HashMap<String, String>();
 		cookie.put("SUB",Constant.SINA_COOKIE_SUB);
-		Document doc = JsoupUtils.jsoupConn(url, cookie);
-		if (doc==null) {
-			for (int i = 0; i < 60; i++) {
-				doc=JsoupUtils.jsoupConn(url, cookie);
-				if (doc!=null) {
-					break;
-				}
-			}
-			if (doc==null) {
-				return null;
-			}
+		Document doc = JsoupUtils.jsoupConnGet(url, cookie, null, 0);
+		if (doc == null) {
+			return null;
 		}
 		return  doc.select("div.weibo_tv_frame>ul>a");
 	}
 	public static Elements crawlerAjaxPage(int page,String end_id,String type){
 		String url="http://weibo.com/p/aj/v6/mblog/videolist?type="+type+"&page="+page+"&end_id="+end_id+"&__rnd="+new Date().getTime();
-		String str = HttpClient.get(url,"SUB="+Constant.SINA_COOKIE_SUB);
+		String str = HttpClient.get(url,"SUB="+Constant.SINA_COOKIE_SUB, 0);
 		if (str==null) {
-			for (int i = 0; i < 60; i++) {
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					log.info(DateUtils.dateToString(new Date())+"  HttpClient -> get 爬取美拍异步分页数据失败 页码："+page+" 视频资源类型 ："+type+" 异常信息："+e.getMessage());
-				}
-				str = HttpClient.get(url,Constant.SINA_COOKIE_SUB);
-				if (str!=null) {
-					break;
-				}
-			}
-			if (str==null) {
+			
 				return null;
-			}
+			
 		}
 		Map<String, Object> re = null;
 		try {
@@ -88,10 +69,6 @@ public class SinaWeiboVideoCrawlerData implements CrawlerData {
 			String url = basicUrl+element.attr("href");
 			Map<String, Object> reMap = ShuoshuVideoUtils.getVideoByShuoshu(url,0);
 			String vu = reMap.get("videoUrl").toString();
-			if (vu!=null&&!vu.equals("")&&vu.substring(0,20).equals("http://us.sinaimg.cn")) {
-				System.out.println(url);
-				/*continue;*/
-			}
 			cv.setVideoUrl(reMap.get("videoUrl").toString());
 			cv.setImgUrl(element.select("div.pic>img.piccut").attr("src"));
 			cv.setType(ResourceUtils.getTypeName(type));
@@ -105,6 +82,7 @@ public class SinaWeiboVideoCrawlerData implements CrawlerData {
 			cv.setTitle(StringUtils.getChineseInString(title));
 			cv.setSource(Constant.SINA_WEIBO_VIDEO);
 			end_id=element.attr("mid");
+			cv.setParentType("娱乐");
 			try {
 				resourceService.addCrawlerVideosingle(cv);
 			} catch (Exception e) {

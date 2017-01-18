@@ -58,7 +58,8 @@ public class HttpClient {
 		}
 	}
 
-	public static String get(String url, String cookies) {
+	public static String get(String url, String cookies, int count) {
+		String re=null;
 		CloseableHttpClient httpclient = HttpClients.createDefault();
 		try {
 			HttpGet httpget = new HttpGet(url);
@@ -70,31 +71,40 @@ public class HttpClient {
 			try {
 				HttpEntity entity = response.getEntity();
 				if (entity != null) {
-					return EntityUtils.toString(entity, "utf-8");
+					re = EntityUtils.toString(entity, "utf-8");
+					return re;
 				}
+			}catch (Exception e) {
+				re=null;
 			} finally {
 				response.close();
 			}
-		} catch (ClientProtocolException e) {
-			e.printStackTrace();
-		} catch (ParseException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
+		} catch (Exception e) {
+			re=null;
+		}finally {
 			try {
 				httpclient.close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
-		return null;
+		if (re==null&&count<=Constant.SEND_REQUEST_COUNT) {
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				
+			}
+			count++;
+			return get( url,  cookies,  count);
+		}else{
+			return null;
+		}
 	}
 
 	public static void main(String[] args) {
 		String cookies = "SUB=_2AkMvJRKKf8NhqwJRmP0cxWnna4VzzAHEieKZeeNRJRMxHRl-yT83qkNZtRBm8IFPLivtXz8hgb5iRvrP-4M1DQ..";
 		String str = get("http://weibo.com/p/aj/v6/mblog/videolist?type=movie&page=2&end_id=4063754960964545&__rnd=1484392303451",
-				cookies);
+				cookies, 0);
 		Map<String, Object> re = (Map<String, Object>) JSON.parse(str);
 		Map<String, Object> data = (Map<String, Object>) JSON.parse(re.get("data").toString());
 		System.out.println(data.get("data"));

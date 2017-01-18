@@ -1,15 +1,25 @@
 package com.xinwangchong.crawler.crawler;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
+import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Logger;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import com.alibaba.fastjson.JSON;
+import com.gargoylesoftware.htmlunit.BrowserVersion;
+import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
+import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.xinwangchong.crawler.common.tools.ResourceUtils;
 import com.xinwangchong.crawler.common.tools.Constant;
 import com.xinwangchong.crawler.common.tools.DateUtils;
@@ -21,19 +31,41 @@ import com.xinwangchong.crawler.service.ResourceService;
 
 public class QQWeishi implements CrawlerData {
 	public static Logger log = Logger.getLogger(QQWeishi.class);
-	public static void main(String[] args) {
-		String url="http://wsm.qq.com/weishi/tag/channelTimeline.php?v=p&g_tk=1184065862&r=1484635017429&callback=jQuery110205478808217984563_1484635017155&start=0&pageflag=2&reqnum=12&lastid=&type=1&key=1&_=1484635017156";
-		String cookie="pt2gguin=o1083447590; ptcz=cf88c8b9c1c2ef2341d49391145168d0a974217d374a7c30afa119e2e265c36b; uin=o1083447590; skey=@RHm7EI7SK; pgv_pvi=7413371904; pgv_si=s2159676416; ptisp=ctc; RK=ovmOheiqcp; rv2=8055D3DE30FB892AB074F4E943F1C24866DE9658BDB8B14780; property20=AE56C1F5A5F85CB2D086EB37C703C60890F2E6114809556EC903CA38127B35585CFD1B3C6F9E48CE; pgv_pvid=7055602006; pgv_info=ssid=s1246900245; o_cookie=1083447590";
-		String string = "{\"ret\":-4,\"errcode\":-4,\"msg\":\"\u8df3\u8f6c\u53c2\u6570\u9519\u8bef\"}";
-		System.out.println(JSON.parse(string));
+
+	public static void main(String[] args) throws FailingHttpStatusCodeException, MalformedURLException, IOException {
+		// TODO Auto-generated method stub
+		WebClient wc = new WebClient(BrowserVersion.FIREFOX_45);
+		LogFactory.getFactory().setAttribute("org.apache.commons.logging.Log",
+				"org.apache.commons.logging.impl.NoOpLog");
+
+		java.util.logging.Logger.getLogger("com.gargoylesoftware.htmlunit").setLevel(Level.OFF);
+
+		java.util.logging.Logger.getLogger("org.apache.commons.httpclient").setLevel(Level.OFF);
+		wc.setJavaScriptTimeout(5000);
+		wc.getOptions().setUseInsecureSSL(true);// 接受任何主机连接 无论是否有有效证书
+		wc.getOptions().setJavaScriptEnabled(true);// 设置支持javascript脚本
+		wc.getOptions().setCssEnabled(false);// 禁用css支持
+		wc.getOptions().setThrowExceptionOnScriptError(false);// js运行错误时不抛出异常
+		wc.getOptions().setTimeout(100000);// 设置连接超时时间
+		wc.getOptions().setDoNotTrackEnabled(false);
+		HtmlPage page = wc.getPage("http://www.weishi.com/c/1");
+		try {
+			Thread.sleep(30000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		String res = page.asXml();
+		System.out.println(res);
 	}
+
 	public static Map<String, Object> crawlerFirstPage(String type, ResourceService resourceService) {
 		Map<String, Object> result = new HashMap<String, Object>();
-		String url = "http://weishi.qq.com/c/"+type+"?fall=1";
-		Document doc = JsoupUtils.jsoupConn(url, null);
+		String url = "http://weishi.qq.com/c/" + type + "?fall=1";
+		Document doc = JsoupUtils.jsoupConnGet(url, null, null, 0);
 		if (doc == null) {
 			for (int i = 0; i < 60; i++) {
-				doc = JsoupUtils.jsoupConn(url, null);
+				doc = JsoupUtils.jsoupConnGet(url, null, null, 0);
 				if (doc != null) {
 					break;
 				}
@@ -56,11 +88,11 @@ public class QQWeishi implements CrawlerData {
 			id = video_container.attr("data-id");
 			cv.setType(ResourceUtils.getTypeName(type));
 			cv.setSource(Constant.MEI_PAI);
-			/*try {
-				resourceService.addCrawlerVideosingle(cv);
-			} catch (Exception e1) {
-				log.info(DateUtils.dateToString(new Date())+"  "+vu+" 视频资源入库失败"+" 异常信息："+e1.getMessage());
-			}*/
+			/*
+			 * try { resourceService.addCrawlerVideosingle(cv); } catch
+			 * (Exception e1) { log.info(DateUtils.dateToString(new Date())+"  "
+			 * +vu+" 视频资源入库失败"+" 异常信息："+e1.getMessage()); }
+			 */
 		}
 		if (id != null && !id.equals("")) {
 			result.put("maxid", id);
@@ -71,15 +103,16 @@ public class QQWeishi implements CrawlerData {
 
 	public static Map<String, Object> crawlerAjaxPage_1(int page, String type, ResourceService resourceService) {
 		String url = "http://www.meipai.com/squares/new_timeline?page=" + page + "&count=24&tid=" + type;
-		String str = HttpClient.get(url, null);
+		String str = HttpClient.get(url, null, 0);
 		if (str == null) {
 			for (int i = 0; i < 60; i++) {
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
-					log.info(DateUtils.dateToString(new Date())+"  HttpClient -> get 爬取美拍异步分页数据失败 页码："+page+" 视频资源类型 ："+type+" 异常信息："+e.getMessage());
+					log.info(DateUtils.dateToString(new Date()) + "  HttpClient -> get 爬取美拍异步分页数据失败 页码：" + page
+							+ " 视频资源类型 ：" + type + " 异常信息：" + e.getMessage());
 				}
-				str = HttpClient.get(url, null);
+				str = HttpClient.get(url, null, 0);
 				if (str != null) {
 					break;
 				}
@@ -103,7 +136,7 @@ public class QQWeishi implements CrawlerData {
 			try {
 				resourceService.addCrawlerVideosingle(cv);
 			} catch (Exception e) {
-				log.info(DateUtils.dateToString(new Date())+"  "+vu+" 视频资源入库失败"+" 异常信息："+e.getMessage());
+				log.info(DateUtils.dateToString(new Date()) + "  " + vu + " 视频资源入库失败" + " 异常信息：" + e.getMessage());
 			}
 		}
 		return null;
@@ -113,15 +146,16 @@ public class QQWeishi implements CrawlerData {
 			ResourceService resourceService) {
 		String url = "http://www.meipai.com/topics/hot_timeline?page=" + page + "&count=24&tid=" + type + "&maxid="
 				+ maxid;
-		String str = HttpClient.get(url, null);
+		String str = HttpClient.get(url, null, 0);
 		if (str == null) {
 			for (int i = 0; i < 60; i++) {
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
-					log.info(DateUtils.dateToString(new Date())+"  HttpClient -> get 爬取美拍异步分页数据失败 页码："+page+" 视频资源类型 ："+type+" 异常信息："+e.getMessage());
+					log.info(DateUtils.dateToString(new Date()) + "  HttpClient -> get 爬取美拍异步分页数据失败 页码：" + page
+							+ " 视频资源类型 ：" + type + " 异常信息：" + e.getMessage());
 				}
-				str = HttpClient.get(url, null);
+				str = HttpClient.get(url, null, 0);
 				if (str != null) {
 					break;
 				}
@@ -148,7 +182,7 @@ public class QQWeishi implements CrawlerData {
 			try {
 				resourceService.addCrawlerVideosingle(cv);
 			} catch (Exception e) {
-				log.info(DateUtils.dateToString(new Date())+"  "+vu+" 视频资源入库失败"+" 异常信息："+e.getMessage());
+				log.info(DateUtils.dateToString(new Date()) + "  " + vu + " 视频资源入库失败" + " 异常信息：" + e.getMessage());
 			}
 		}
 		if (id != null && !id.equals("")) {

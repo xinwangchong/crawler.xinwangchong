@@ -22,17 +22,9 @@ public class MeipaiCrawlerData implements CrawlerData {
 	public static Map<String, Object> crawlerFirstPage(String type, ResourceService resourceService) {
 		Map<String, Object> result = new HashMap<String, Object>();
 		String url = "http://www.meipai.com/square/" + type;
-		Document doc = JsoupUtils.jsoupConn(url, null);
+		Document doc = JsoupUtils.jsoupConnGet(url, null, null, 0);
 		if (doc == null) {
-			for (int i = 0; i < 60; i++) {
-				doc = JsoupUtils.jsoupConn(url, null);
-				if (doc != null) {
-					break;
-				}
-			}
-			if (doc == null) {
-				return null;
-			}
+			return null;
 		}
 		Elements els = doc.select("ul#mediasList>li");
 		String id = null;
@@ -48,6 +40,7 @@ public class MeipaiCrawlerData implements CrawlerData {
 			id = video_container.attr("data-id");
 			cv.setType(ResourceUtils.getTypeName(type));
 			cv.setSource(Constant.MEI_PAI);
+			cv.setParentType("娱乐");
 			try {
 				resourceService.addCrawlerVideosingle(cv);
 			} catch (Exception e1) {
@@ -63,22 +56,9 @@ public class MeipaiCrawlerData implements CrawlerData {
 
 	public static Map<String, Object> crawlerAjaxPage_1(int page, String type, ResourceService resourceService) {
 		String url = "http://www.meipai.com/squares/new_timeline?page=" + page + "&count=24&tid=" + type;
-		String str = HttpClient.get(url, null);
+		String str = HttpClient.get(url, null, 0);
 		if (str == null) {
-			for (int i = 0; i < 60; i++) {
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					log.info(DateUtils.dateToString(new Date())+"  HttpClient -> get 爬取美拍异步分页数据失败 页码："+page+" 视频资源类型 ："+type+" 异常信息："+e.getMessage());
-				}
-				str = HttpClient.get(url, null);
-				if (str != null) {
-					break;
-				}
-			}
-			if (str == null) {
-				return null;
-			}
+			return null;
 		}
 		Map<String, Object> re = (Map<String, Object>) JSON.parse(str);
 		List<Map<String, Object>> data = (List<Map<String, Object>>) JSON.parse(re.get("medias").toString());
@@ -92,6 +72,7 @@ public class MeipaiCrawlerData implements CrawlerData {
 			cv.setVideoUrl(map.get("video").toString());
 			cv.setType(ResourceUtils.getTypeName(type));
 			cv.setSource(Constant.MEI_PAI);
+			cv.setParentType("娱乐");
 			try {
 				resourceService.addCrawlerVideosingle(cv);
 			} catch (Exception e) {
@@ -105,22 +86,11 @@ public class MeipaiCrawlerData implements CrawlerData {
 			ResourceService resourceService) {
 		String url = "http://www.meipai.com/topics/hot_timeline?page=" + page + "&count=24&tid=" + type + "&maxid="
 				+ maxid;
-		String str = HttpClient.get(url, null);
+		String str = HttpClient.get(url, null, 0);
 		if (str == null) {
-			for (int i = 0; i < 60; i++) {
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					log.info(DateUtils.dateToString(new Date())+"  HttpClient -> get 爬取美拍异步分页数据失败 页码："+page+" 视频资源类型 ："+type+" 异常信息："+e.getMessage());
-				}
-				str = HttpClient.get(url, null);
-				if (str != null) {
-					break;
-				}
-			}
-			if (str == null) {
+			
 				return null;
-			}
+			
 		}
 		Map<String, Object> re = (Map<String, Object>) JSON.parse(str);
 		List<Map<String, Object>> data = (List<Map<String, Object>>) JSON.parse(re.get("medias").toString());
@@ -137,6 +107,7 @@ public class MeipaiCrawlerData implements CrawlerData {
 			cv.setType(ResourceUtils.getTypeName(type));
 			id = map.get("id").toString();
 			cv.setSource(Constant.MEI_PAI);
+			cv.setParentType("娱乐");
 			try {
 				resourceService.addCrawlerVideosingle(cv);
 			} catch (Exception e) {

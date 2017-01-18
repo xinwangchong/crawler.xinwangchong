@@ -10,6 +10,7 @@ public class CrawlerVideo {
 	private String videoUrl;
 	private String title;
 	private Date createTime;
+	private String parentType;
 
 	public String getId() {
 		return id;
@@ -65,6 +66,14 @@ public class CrawlerVideo {
 
 	public void setCreateTime(Date createTime) {
 		this.createTime = createTime;
+	}
+
+	public String getParentType() {
+		return parentType;
+	}
+
+	public void setParentType(String parentType) {
+		this.parentType = parentType;
 	}
 
 	

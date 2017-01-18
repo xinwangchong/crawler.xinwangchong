@@ -13,10 +13,10 @@ public class ShuoshuVideoUtils {
 			Map<String, Object> map=null;
 			String shuoshuUrl="http://www.flvcd.com/parse.php?format=&kw=";
 			String url=shuoshuUrl+targetUrl;
-			Document doc=JsoupUtils.jsoupConn(url,null);
+			Document doc=JsoupUtils.jsoupConnGet(url,null, null, 0);
 			if (doc==null) {
 				for (int i = 0; i < 60; i++) {
-					doc=JsoupUtils.jsoupConn(url,null);
+					doc=JsoupUtils.jsoupConnGet(url,null, null, 0);
 					if (doc!=null) {
 						break;
 					}

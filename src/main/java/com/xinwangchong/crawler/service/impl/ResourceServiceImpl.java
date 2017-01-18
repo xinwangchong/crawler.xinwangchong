@@ -22,6 +22,7 @@ public class ResourceServiceImpl implements ResourceService {
 	}
 
 	public int addCrawlerVideosingle(CrawlerVideo cv) throws Exception {
+		Thread.sleep(2000);
 		return crawlerVideoDao.insertCrawlerVideosingle(cv);
 	}
 
