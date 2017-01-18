@@ -2,12 +2,12 @@ package com.xinwangchong.crawler.crawler;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.apache.log4j.Logger;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import com.xinwangchong.crawler.common.tools.Constant;
 import com.xinwangchong.crawler.common.tools.DateUtils;
 import com.xinwangchong.crawler.common.tools.JsoupUtils;
 import com.xinwangchong.crawler.common.tools.StringUtils;
@@ -16,16 +16,7 @@ import com.xinwangchong.crawler.service.ResourceService;
 public class JidongCrawlerData implements CrawlerData {
 	public static Logger log = Logger.getLogger(JidongCrawlerData.class);
 	public static void main(String[] args) {
-		Map<String, String> params=new HashMap<String, String>();
-		params.put("pageNum", "1");
-		params.put("saction", "search");
-		Document doc = JsoupUtils.jsoupConnPost("http://www.joy.cn/entertainment/all", null, params, 0);
-		Elements pager_a = doc.select("table.paginator a");
-		/*for (Element e : pager_a) {
-			System.out.println(e.text());
-		}*/
-		String a_text = pager_a.get(6).text();
-		System.out.println(a_text.substring(1, a_text.length()-1));
+		new JidongCrawlerData().crawler(null, 1);
 	}
 	
 	
@@ -58,12 +49,15 @@ public class JidongCrawlerData implements CrawlerData {
 						cv.setParentType(type);
 						cv.setType(type);
 					}
-					cv.setSource("激动网");
+					cv.setSource(Constant.JI_DONG_VIDEO);
 					cv.setTitle(StringUtils.getChineseInString(e.select("a.joy_item_a").text()));
 					cv.setImgUrl(e.select("img").attr("src"));
 					String videoHtmlUrl = e.select("a.joy_item_a").attr("href");
 					Document vd = JsoupUtils.jsoupConnPost(types.get(type)+videoHtmlUrl, null, params, 0);
 					cv.setVideoUrl(vd.select("source").attr("src"));
+					System.out.println(cv.getImgUrl());
+					System.out.println(cv.getTitle());
+					System.out.println(cv.getVideoUrl());
 					try {
 						resourceService.addCrawlerVideosingle(cv);
 					} catch (Exception e1) {
