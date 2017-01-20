@@ -41,6 +41,7 @@ public class MeipaiCrawlerData implements CrawlerData {
 			cv.setType(ResourceUtils.getTypeName(type));
 			cv.setSource(Constant.MEI_PAI);
 			cv.setParentType("娱乐");
+			cv.setVideoType("mp4");
 			try {
 				resourceService.addCrawlerVideosingle(cv);
 			} catch (Exception e1) {
@@ -73,6 +74,7 @@ public class MeipaiCrawlerData implements CrawlerData {
 			cv.setType(ResourceUtils.getTypeName(type));
 			cv.setSource(Constant.MEI_PAI);
 			cv.setParentType("娱乐");
+			cv.setVideoType("mp4");
 			try {
 				resourceService.addCrawlerVideosingle(cv);
 			} catch (Exception e) {
@@ -108,6 +110,7 @@ public class MeipaiCrawlerData implements CrawlerData {
 			id = map.get("id").toString();
 			cv.setSource(Constant.MEI_PAI);
 			cv.setParentType("娱乐");
+			cv.setVideoType("mp4");
 			try {
 				resourceService.addCrawlerVideosingle(cv);
 			} catch (Exception e) {

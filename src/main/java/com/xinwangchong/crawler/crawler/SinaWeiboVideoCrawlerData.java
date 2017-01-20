@@ -60,7 +60,6 @@ public class SinaWeiboVideoCrawlerData implements CrawlerData {
 	}
 	public static Map<String, Object> parseHtml(Elements es,String basicUrl,String type,ResourceService resourceService){
 		Map<String, Object> result=new HashMap<String, Object>();
-		List<CrawlerVideo> cvs=new ArrayList<CrawlerVideo>();
 		CrawlerVideo cv=null;
 		String end_id=null;
 		for (Element element : es) {
@@ -69,7 +68,7 @@ public class SinaWeiboVideoCrawlerData implements CrawlerData {
 			String url = basicUrl+element.attr("href");
 			Map<String, Object> reMap = ShuoshuVideoUtils.getVideoByShuoshu(url,0);
 			String vu = reMap.get("videoUrl").toString();
-			cv.setVideoUrl(reMap.get("videoUrl").toString());
+			cv.setVideoUrl(vu);
 			cv.setImgUrl(element.select("div.pic>img.piccut").attr("src"));
 			cv.setType(ResourceUtils.getTypeName(type));
 			String title = element.select("div.intra_a>div.txt_cut").text();
@@ -83,6 +82,12 @@ public class SinaWeiboVideoCrawlerData implements CrawlerData {
 			cv.setSource(Constant.SINA_WEIBO_VIDEO);
 			end_id=element.attr("mid");
 			cv.setParentType("娱乐");
+			if (vu.indexOf(".flv")>-1) {
+				cv.setVideoType("flv");
+			}
+			else{
+				cv.setVideoType("mp4");
+			}
 			try {
 				resourceService.addCrawlerVideosingle(cv);
 			} catch (Exception e) {

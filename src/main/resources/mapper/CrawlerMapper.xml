@@ -3,16 +3,16 @@
 <mapper namespace="com.xinwangchong.crawler.dao.CrawlerVideoDao">
 	<insert id="insertCrawlerVideo" parameterType="List">
 		insert into crawler_video
-		(id,type,source,imgUrl,videoUrl,title,parentType,createTime) values
+		(id,type,source,imgUrl,videoUrl,title,parentType,videoType,createTime) values
 		<foreach collection="list" item="item" index="index"
 			separator=",">
-			(#{item.id},#{item.type},#{item.source},#{item.imgUrl},#{item.videoUrl},#{item.title},#{item.parentType},now())
+			(#{item.id},#{item.type},#{item.source},#{item.imgUrl},#{item.videoUrl},#{item.title},#{item.parentType},#{item.videoType},now())
 		</foreach>
 	</insert>
 	<insert id="insertCrawlerVideosingle" parameterType="com.xinwangchong.crawler.entity.CrawlerVideo">
 		insert into crawler_video
-		(id,type,source,imgUrl,videoUrl,title,parentType,createTime) values
-        (#{id},#{type},#{source},#{imgUrl},#{videoUrl},#{title},#{parentType},now())
+		(id,type,source,imgUrl,videoUrl,title,parentType,videoType,createTime) values
+        (#{id},#{type},#{source},#{imgUrl},#{videoUrl},#{title},#{parentType}#{videoType},now())
 	</insert>
 	<delete id="deletCrawlerVideo" >
 		delete from crawler_video where 1=1

@@ -21,20 +21,20 @@ public class UpdateResourceJob {
 	public static Date deleteTime=null;
 	public void worker() {
 		
-		/*try {
+		try {
 			crawlerMeipaiWork(resourceService,1,new MeipaiCrawlerData());
 		} catch (Exception e) {
-			log.info(DateUtils.dateToString(new Date())+" 抓取美拍视频此次调度失败");
-		}*/
-		try {
+			log.info(DateUtils.dateToString(new Date())+" 抓取"+Constant.MEI_PAI+"此次调度失败");
+		}
+		/*try {
 			crawlerMeipaiWork(resourceService,1,new JidongCrawlerData());
 		} catch (Exception e) {
 			log.info(DateUtils.dateToString(new Date())+" 抓取"+Constant.JI_DONG_VIDEO+"此次调度失败");
 		}
-		/*try {
+		try {
 			crawlerSinaWeiboWork(resourceService,1,new SinaWeiboVideoCrawlerData());
 		} catch (Exception e) {
-			log.info(DateUtils.dateToString(new Date())+" 抓取新浪微博视频此次调度失败");
+			log.info(DateUtils.dateToString(new Date())+" 抓取"+Constant.SINA_WEIBO_VIDEO+"此次调度失败");
 		}*/
 	}
 	private void crawlerMeipaiWork(ResourceService rs,int pages,CrawlerData crawlerData) throws Exception{

@@ -55,9 +55,7 @@ public class JidongCrawlerData implements CrawlerData {
 					String videoHtmlUrl = e.select("a.joy_item_a").attr("href");
 					Document vd = JsoupUtils.jsoupConnPost(types.get(type)+videoHtmlUrl, null, params, 0);
 					cv.setVideoUrl(vd.select("source").attr("src"));
-					System.out.println(cv.getImgUrl());
-					System.out.println(cv.getTitle());
-					System.out.println(cv.getVideoUrl());
+					cv.setVideoType("mp4");
 					try {
 						resourceService.addCrawlerVideosingle(cv);
 					} catch (Exception e1) {

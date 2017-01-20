@@ -11,6 +11,15 @@ public class CrawlerVideo {
 	private String title;
 	private Date createTime;
 	private String parentType;
+	private String videoType;
+	
+	public String getVideoType() {
+		return videoType;
+	}
+
+	public void setVideoType(String videoType) {
+		this.videoType = videoType;
+	}
 
 	public String getId() {
 		return id;
